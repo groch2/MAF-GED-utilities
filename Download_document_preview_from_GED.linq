@@ -1,0 +1,35 @@
+<Query Kind="Statements">
+  <Namespace>System.Net.Http</Namespace>
+  <Namespace>System.Net.Http.Headers</Namespace>
+  <Namespace>System.Net.Http.Json</Namespace>
+  <Namespace>System.Text.Json</Namespace>
+  <Namespace>System.Text.Json.Nodes</Namespace>
+  <Namespace>System.Threading.Tasks</Namespace>
+</Query>
+
+const string apiVersion = "v2";
+var client = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/") };
+Console.WriteLine("Enter documentId :");
+var documentId = Console.ReadLine();
+var downloadAddress = new Uri($"/{apiVersion}/downloadPreview?documentId={documentId}", UriKind.Relative);
+using var downloadRequest = new HttpRequestMessage(HttpMethod.Get, downloadAddress);
+var httpDownloadResponse = await client.SendAsync(downloadRequest);
+var fileDownloadPath =
+	Path.Combine(
+		Path.GetTempPath(),
+		"documents-GED-preview",
+		Path.GetRandomFileName());
+var directoryPath = Path.GetDirectoryName(fileDownloadPath);
+Directory.CreateDirectory(directoryPath);
+fileDownloadPath = Path.ChangeExtension(fileDownloadPath, "png");
+using var outputFileStream = new FileStream(fileDownloadPath, FileMode.Create);
+using var downloadStream = await httpDownloadResponse.Content.ReadAsStreamAsync();
+await downloadStream.CopyToAsync(outputFileStream);  
+
+using var process = new Process();
+var programFilesx86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+process.StartInfo.FileName = Path.Combine(programFilesx86, @"Google\Chrome\Application\chrome.exe");;
+process.StartInfo.Arguments = fileDownloadPath;
+process.Start();
+process.WaitForExit();
+process.Close();
