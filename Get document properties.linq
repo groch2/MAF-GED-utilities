@@ -14,7 +14,11 @@ XElement
 	.First(n => n.Name.LocalName == "EntityType" && n.Attributes().Any(a => a.Name == "Name" && a.Value == "Document"))
 	.Descendants()
 	.Where(n => n.Name.LocalName == "Property")
-	.Select(n => new { Name = CapitalizeFirstLetter(n.Attribute("Name").Value), Type = n.Attribute("Type").Value })
+	.Select(n =>
+		new {
+			Name = CapitalizeFirstLetter(n.Attribute("Name").Value),
+			Type = n.Attribute("Type").Value
+		})
 	.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
 	.ToArray()
 	.Dump();

@@ -1,4 +1,5 @@
 <Query Kind="Program">
+  <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Net.Http.Json</Namespace>
   <Namespace>System.Text.Json</Namespace>
@@ -10,31 +11,52 @@
 
 async Task Main()
 {
+	const string documentId = "20240124104154804557718141";
+	var libellePatchValue = Guid.NewGuid().ToString("N").ToUpperInvariant();
 	var documentPatch =
 		JsonSerializer.SerializeToNode(
 			new {
-				Libelle = "coucou",
+				ModifiePar = "ROD",
+				Libelle = libellePatchValue
 			});
 	var patchDocumentResponse =
-		await UpdateDocument(
-			documentId: "20240108171918478337442374",
+		await PatchDocument(
+			documentId: documentId,
 			documentPatch: documentPatch);
-	patchDocumentResponse.EnsureSuccessStatusCode();
-	new { 
-		patchDocumentResponse.ReasonPhrase,
-		patchDocumentResponse.StatusCode
+	new {
+		patchDocumentResponse.StatusCode,
+		patchDocumentResponse.ReasonPhrase
 	}.Dump();
+	patchDocumentResponse.EnsureSuccessStatusCode();	
+	
+	var document = await GetDocumentById(documentId);
+	var actualDocumentLibelle = document.Libelle;
+	var isExpectedLibelle = actualDocumentLibelle == libellePatchValue;
+	new {
+		isExpectedLibelle,
+		newLibelle = document.Libelle,
+		expectedLibelle = libellePatchValue
+	}.Dump();
+	System.Diagnostics.Debug.Assert(isExpectedLibelle);
 }
 
-HttpClient httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/") };
-async Task<HttpResponseMessage> UpdateDocument(string documentId, JsonNode documentPatch) {
+HttpClient httpClient =
+	new HttpClient {
+		BaseAddress = new Uri("http://localhost:44363/v2/Documents/") };
+
+async Task<HttpResponseMessage> PatchDocument(string documentId, JsonNode documentPatch) {
+	//documentPatch["@odata.type"] = "MAF.GED.Domain.Model.Document";
 	var requestContent = JsonContent.Create(documentPatch);
 	return await httpClient.PatchAsync(documentId, requestContent);
 }
 
-readonly Random dice = new();
-string GetRandomWord() => new string(new int[10].Select(_ => (char)(dice.Next(26) + (int)'A')).ToArray());
-
+JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+async Task<MAF.GED.Domain.Model.Document> GetDocumentById(string documentId) {
+	var documentJson = await httpClient.GetStringAsync(documentId);
+	var document = JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(documentJson, jsonSerializerOptions);
+	return document;
+}
+	
 /*
 AssigneDepartement
 AssigneGroup
@@ -55,6 +77,7 @@ DateNumerisation
 DeposeLe
 DeposePar
 Docn
+DocumentId
 DocumentId
 DocumentValide
 DuplicationId
