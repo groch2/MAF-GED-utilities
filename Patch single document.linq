@@ -11,7 +11,7 @@
 
 async Task Main()
 {
-	const string documentId = "20240124104154804557718141";
+	const string documentId = "20240130102212266277270137";
 	var libellePatchValue = Guid.NewGuid().ToString("N").ToUpperInvariant();
 	var documentPatch =
 		JsonSerializer.SerializeToNode(
@@ -42,7 +42,7 @@ async Task Main()
 
 HttpClient httpClient =
 	new HttpClient {
-		BaseAddress = new Uri("http://localhost:44363/v2/Documents/") };
+		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/") };
 
 async Task<HttpResponseMessage> PatchDocument(string documentId, JsonNode documentPatch) {
 	//documentPatch["@odata.type"] = "MAF.GED.Domain.Model.Document";

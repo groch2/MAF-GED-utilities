@@ -1,44 +1,46 @@
 <Query Kind="Statements">
   <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
+  <Reference Relative="..\Json130r3\Bin\net6.0\Newtonsoft.Json.dll">&lt;MyDocuments&gt;\Json130r3\Bin\net6.0\Newtonsoft.Json.dll</Reference>
   <Namespace>System.Data.SqlClient</Namespace>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
-  <Namespace>System.Text.Json.Nodes</Namespace>
   <Namespace>System.Text.Json.Serialization</Namespace>
   <Namespace>System.Threading.Tasks</Namespace>
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
-var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/") };
-const string documentsIdListFile =
-	@"C:\Users\deschaseauxr\Documents\Document entrant - remplacer GED WS par web api GED\documents id list.txt";
-var documentsIdList =
-	string.Join(',', File.ReadAllLines(documentsIdListFile).Select(documentId => $"'{documentId}'"));
-var json_documents = await httpClient.GetStringAsync($"?$filter=documentId in ({documentsIdList})");
+var httpClient =
+	new HttpClient {
+		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
+	};
+const string libellé = "test";
+var actual_documents =
+	await httpClient.GetStringAsync(
+		$"?$filter=libelle eq '{libellé}'");
+actual_documents.Dump();
 var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-JsonDocument
-	.Parse(json_documents)
-	.RootElement.GetProperty("value")
-	.EnumerateArray()
-	.Select(document =>
-		JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(
-			json: document.ToString(),
-			options: jsonSerializerOptions))
-	.Select(document =>
-		new {
-			document.AssigneRedacteur,
-			Famille = document.CategoriesFamille,
-			Cote = document.CategoriesCote,
-			TypeDoc = document.CategoriesTypeDocument,
-			document.CompteId,
-			document.DateDocument,
-			document.DocumentId,
-			document.FichierNom,
-			document.Libelle,
-			document.PersonneId,
-		})
-	.OrderBy(document => document.DocumentId)
-	.Dump();
+var documents =
+	JsonDocument
+		.Parse(actual_documents)
+		.RootElement.GetProperty("value")
+		.EnumerateArray()
+		.Select(document => JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(document))
+		.Select(document =>
+			new {
+				document.AssigneRedacteur,
+				document.CategoriesCote,
+				document.CategoriesFamille,
+				document.CategoriesTypeDocument,
+				document.CompteId,
+				document.DateDocument,
+				document.DocumentId,
+				document.Extension,
+				document.FichierNom,
+				document.Libelle,
+				document.PersonneId,
+			})
+		.OrderBy(document => document.DocumentId);
+documents.Dump();
 
 /*
 AssigneDepartement

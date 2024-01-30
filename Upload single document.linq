@@ -30,7 +30,10 @@ const string gedApiAddress = "https://api-ged-intra.int.maf.local/v2/";
 HttpClient gedApiHttpClient = new HttpClient { BaseAddress = new Uri(gedApiAddress) };
 async Task<string> UploadDocumentToGed(string filePath, JsonNode documentMetadata) {
 	var fileName = Path.GetFileName(filePath);
-	var documentUploadId = await UploadFile(filePath: filePath, fileName: fileName);
+	var documentUploadId =
+		await UploadFile(
+			filePath: filePath,
+			fileName: fileName);
 	var documentId =
 		await FinalizeUpload(
 			documentUploadId: documentUploadId,
@@ -40,12 +43,12 @@ async Task<string> UploadDocumentToGed(string filePath, JsonNode documentMetadat
 
 	async Task<string> UploadFile(string filePath, string fileName) {
 		await using var stream = File.OpenRead(filePath);
-		using var request = new HttpRequestMessage(HttpMethod.Post, new Uri("/v2/upload", UriKind.Relative));
+		using var request = new HttpRequestMessage(HttpMethod.Post, new Uri("upload", UriKind.Relative));
 		using var content = new MultipartFormDataContent { { new StreamContent(stream), "file", fileName } };
 		request.Content = content;
-		var uploadResponse = await gedApiHttpClient.SendAsync(request);
-		uploadResponse.EnsureSuccessStatusCode();
-		var responseContent = await uploadResponse.Content.ReadAsStringAsync();
+		using var response = await gedApiHttpClient.SendAsync(request);
+		response.EnsureSuccessStatusCode();
+		var responseContent = await response.Content.ReadAsStringAsync();
 		return JsonNode.Parse(responseContent)["guidFile"].GetValue<string>();
 	}
 
@@ -53,11 +56,11 @@ async Task<string> UploadDocumentToGed(string filePath, JsonNode documentMetadat
 		documentMetadata["fileId"] = documentUploadId;
 		documentMetadata["libelle"] = fileName;
 		documentMetadata["fichierNom"] = fileName;
-		var documentUploadJson = JsonContent.Create(documentMetadata);
-		var finalizeUploadResponse =
+		using var documentUploadJson = JsonContent.Create(documentMetadata);
+		using var response =
 			await gedApiHttpClient.PostAsync(new Uri("finalizeUpload", UriKind.Relative), documentUploadJson);
-		finalizeUploadResponse.EnsureSuccessStatusCode();
-		var uploadResponseContent = await finalizeUploadResponse.Content.ReadAsStringAsync();
+		response.EnsureSuccessStatusCode();
+		var uploadResponseContent = await response.Content.ReadAsStringAsync();
 		return JsonNode.Parse(uploadResponseContent)["documentId"].GetValue<string>();
 	}
 }

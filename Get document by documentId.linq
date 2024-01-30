@@ -1,7 +1,5 @@
 <Query Kind="Statements">
   <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
-  <Reference Relative="..\Json130r3\Bin\net6.0\Newtonsoft.Json.dll">&lt;MyDocuments&gt;\Json130r3\Bin\net6.0\Newtonsoft.Json.dll</Reference>
-  <Namespace>System.Data.SqlClient</Namespace>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
   <Namespace>System.Text.Json.Serialization</Namespace>
@@ -9,36 +7,20 @@
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
-var httpClient =
-	new HttpClient {
-		BaseAddress = new Uri("https://api-ged-intra.hom.maf.local/v2/Documents/")
-	};
-const string libellé = "dhdh";
-var actual_documents =
-	await httpClient.GetStringAsync(
-		$"?$filter=libelle eq '{libellé}'");
-var documents =
-	JsonDocument
-		.Parse(actual_documents)
-		.RootElement.GetProperty("value")
-		.EnumerateArray()
-		.Select(document => Newtonsoft.Json.JsonConvert.DeserializeObject<MAF.GED.Domain.Model.Document>(document.ToString()))
-		.Select(document =>
-			new {
-				document.AssigneRedacteur,
-				document.CategoriesCote,
-				document.CategoriesFamille,
-				document.CategoriesTypeDocument,
-				document.CompteId,
-				document.DateDocument,
-				document.DocumentId,
-				document.Extension,
-				document.FichierNom,
-				document.Libelle,
-				document.PersonneId,
-			})
-		.OrderBy(document => document.DocumentId);
-documents.Dump();
+var httpClient = new HttpClient {
+	BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
+};
+const string documentId = "20240130103944817138476882";
+var raw_document = await httpClient.GetStringAsync(documentId);
+var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+var document =
+	JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(raw_document, jsonSerializerOptions);
+new {
+	document.DocumentId,
+	document.Libelle,
+	document.CompteId,
+	document.PersonneId
+}.Dump();
 
 /*
 AssigneDepartement
@@ -60,7 +42,6 @@ DateNumerisation
 DeposeLe
 DeposePar
 Docn
-DocumentId
 DocumentId
 DocumentValide
 DuplicationId
