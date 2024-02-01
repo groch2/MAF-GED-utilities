@@ -1,7 +1,5 @@
 <Query Kind="Statements">
   <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
-  <Reference Relative="..\Json130r3\Bin\net6.0\Newtonsoft.Json.dll">&lt;MyDocuments&gt;\Json130r3\Bin\net6.0\Newtonsoft.Json.dll</Reference>
-  <Namespace>System.Data.SqlClient</Namespace>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
   <Namespace>System.Text.Json.Serialization</Namespace>
@@ -13,18 +11,15 @@ var httpClient =
 	new HttpClient {
 		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
 	};
-const string libellé = "test";
-var actual_documents =
-	await httpClient.GetStringAsync(
-		$"?$filter=libelle eq '{libellé}'");
-actual_documents.Dump();
+const string libellé = "3-QICIVRLHFM";
+var actual_documents = await httpClient.GetStringAsync($"?$filter=libelle eq '{libellé}'");
 var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 var documents =
 	JsonDocument
 		.Parse(actual_documents)
 		.RootElement.GetProperty("value")
 		.EnumerateArray()
-		.Select(document => JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(document))
+		.Select(document => JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(document, jsonSerializerOptions))
 		.Select(document =>
 			new {
 				document.AssigneRedacteur,
