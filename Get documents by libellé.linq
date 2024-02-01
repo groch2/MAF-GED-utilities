@@ -14,28 +14,27 @@ var httpClient =
 const string libellé = "3-QICIVRLHFM";
 var actual_documents = await httpClient.GetStringAsync($"?$filter=libelle eq '{libellé}'");
 var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-var documents =
-	JsonDocument
-		.Parse(actual_documents)
-		.RootElement.GetProperty("value")
-		.EnumerateArray()
-		.Select(document => JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(document, jsonSerializerOptions))
-		.Select(document =>
-			new {
-				document.AssigneRedacteur,
-				document.CategoriesCote,
-				document.CategoriesFamille,
-				document.CategoriesTypeDocument,
-				document.CompteId,
-				document.DateDocument,
-				document.DocumentId,
-				document.Extension,
-				document.FichierNom,
-				document.Libelle,
-				document.PersonneId,
-			})
-		.OrderBy(document => document.DocumentId);
-documents.Dump();
+JsonDocument
+	.Parse(actual_documents)
+	.RootElement.GetProperty("value")
+	.EnumerateArray()
+	.Select(document => JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(document, jsonSerializerOptions))
+	.Select(document =>
+		new {
+			document.AssigneRedacteur,
+			document.CategoriesCote,
+			document.CategoriesFamille,
+			document.CategoriesTypeDocument,
+			document.CompteId,
+			document.DateDocument,
+			document.DocumentId,
+			document.Extension,
+			document.FichierNom,
+			document.Libelle,
+			document.PersonneId,
+		})
+	.OrderBy(document => document.DocumentId)
+	.Dump();
 
 /*
 AssigneDepartement
