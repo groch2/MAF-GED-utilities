@@ -16,14 +16,18 @@ async Task Main() {
 				categoriesFamille = "DOCUMENTS CONTRAT",
 				categoriesCote = "AUTRES",
 				categoriesTypeDocument = "DIVERS",
-				canalId = 1
+				canalId = 1,
+				libelle = GetRandomWord()
 			});
 	const string filePath = @"C:\Users\deschaseauxr\Documents\GED\upload_tiny_document.pdf";
 	var documentId = 
 		await UploadDocumentToGed(
 			filePath: filePath,
 			documentMetadata: documentMetadata);
-	new { documentId }.Dump();
+	new {
+		documentId,
+		libelle = documentMetadata["libelle"].GetValue<string>()
+	}.Dump();
 }
 	
 const string gedApiAddress = "https://api-ged-intra.int.maf.local/v2/";
@@ -54,7 +58,6 @@ async Task<string> UploadDocumentToGed(string filePath, JsonNode documentMetadat
 
 	async Task<string> FinalizeUpload(string documentUploadId, string fileName, JsonNode documentMetadata) {
 		documentMetadata["fileId"] = documentUploadId;
-		documentMetadata["libelle"] = fileName;
 		documentMetadata["fichierNom"] = fileName;
 		using var documentUploadJson = JsonContent.Create(documentMetadata);
 		using var response =
@@ -64,3 +67,7 @@ async Task<string> UploadDocumentToGed(string filePath, JsonNode documentMetadat
 		return JsonNode.Parse(uploadResponseContent)["documentId"].GetValue<string>();
 	}
 }
+
+Random dice = new Random();
+string GetRandomWord(int length = 10) =>
+	new string(new int[length].Select(_ => (char)(dice.Next(26) + (int)'A')).ToArray());

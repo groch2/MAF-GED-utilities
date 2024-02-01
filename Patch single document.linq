@@ -51,11 +51,8 @@ async Task<HttpResponseMessage> PatchDocument(string documentId, JsonNode docume
 }
 
 JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-async Task<MAF.GED.Domain.Model.Document> GetDocumentById(string documentId) {
-	var documentJson = await httpClient.GetStringAsync(documentId);
-	var document = JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(documentJson, jsonSerializerOptions);
-	return document;
-}
+async Task<MAF.GED.Domain.Model.Document> GetDocumentById(string documentId) =>
+	await httpClient.GetFromJsonAsync<MAF.GED.Domain.Model.Document>(documentId, jsonSerializerOptions);
 	
 /*
 AssigneDepartement
