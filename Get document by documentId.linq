@@ -1,6 +1,7 @@
 <Query Kind="Statements">
   <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
   <Namespace>System.Net.Http</Namespace>
+  <Namespace>System.Net.Http.Json</Namespace>
   <Namespace>System.Text.Json</Namespace>
   <Namespace>System.Text.Json.Serialization</Namespace>
   <Namespace>System.Threading.Tasks</Namespace>
@@ -10,14 +11,15 @@
 var httpClient = new HttpClient {
 	BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
 };
-const string documentId = "20240130103944817138476882";
-var raw_document = await httpClient.GetStringAsync(documentId);
+const string documentId = "20240125184202063860128348";
 var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-var document =
-	JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(raw_document, jsonSerializerOptions);
+var document = await httpClient.GetFromJsonAsync<MAF.GED.Domain.Model.Document>(documentId, jsonSerializerOptions);
 new {
 	document.DocumentId,
 	document.Libelle,
+	Famille = document.CategoriesFamille,
+	Cote = document.CategoriesCote,
+	TypeDocument = document.CategoriesTypeDocument,
 	document.CompteId,
 	document.PersonneId
 }.Dump();
