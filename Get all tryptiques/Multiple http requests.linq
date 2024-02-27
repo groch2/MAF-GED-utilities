@@ -8,7 +8,7 @@
 //typeof(TypeDocument).GetProperties().Select(p => $"TypeDocument{p.Name} = typeDocument.{p.Name},").Dump();
 //Environment.Exit(0);
 
-var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/") };
+var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.hom.maf.local/v2/") };
 var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
 var famillesListJsonResponse =
@@ -74,6 +74,14 @@ famillesList
 			.OrderBy(tryptique => tryptique.FamilleCode, StringComparer.OrdinalIgnoreCase)
 			.ThenBy(tryptique => tryptique.CoteCode, StringComparer.OrdinalIgnoreCase)
 			.ThenBy(tryptique => tryptique.TypeDocumentCode, StringComparer.OrdinalIgnoreCase)
+			//.Where(t => t.FamilleCode == "")
+			//.Where(t => t.CoteCode == "")
+			//.Where(t => t.TypeDocumentCode == "")
+			//.Select(t => new {
+			//	Famille = t.FamilleCode,
+			//	Cote = t.CoteCode,
+			//	TypeDocument = t.TypeDocumentCode
+			//})
 			.Dump();
 
 record Famille(int FamilleDocumentId, string Code, string Libelle);
