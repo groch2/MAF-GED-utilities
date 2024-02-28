@@ -8,7 +8,7 @@
 </Query>
 
 const string filePath =
-	@"C:\Users\deschaseauxr\AppData\Local\Temp\Nouveau dossier\Doc_Test_3.txt";
+	@"C:\Users\deschaseauxr\AppData\Local\Temp\new 4.txt";
 var fileName = Path.GetFileName(filePath);
 const string gedApiVersion = "v2";
 
@@ -20,6 +20,7 @@ requestUpload.Content = content;
 
 var client = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/") };
 var httpResponseUpload = await client.SendAsync(requestUpload);
+httpResponseUpload.EnsureSuccessStatusCode();
 var uploadResponseContent = await httpResponseUpload.Content.ReadAsStringAsync();
 var uploadId = JsonNode.Parse(uploadResponseContent)["guidFile"].GetValue<string>();
 
@@ -50,16 +51,25 @@ var documentDownloadAddress =
 using var documentDownloadRequest =
 	new HttpRequestMessage(HttpMethod.Get, documentDownloadAddress);
 var documentDownloadResponse = await client.SendAsync(documentDownloadRequest);
-var fileDownloadPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-fileDownloadPath = Path.ChangeExtension(fileDownloadPath, "pdf");
+documentDownloadResponse.EnsureSuccessStatusCode();
+var fileDownloadPath =
+	Path.Combine(
+		Path.GetTempPath(),
+		Path.ChangeExtension(
+			Path.GetRandomFileName(), "pdf"
+		)
+	);
 using var outputFileStream = new FileStream(fileDownloadPath, FileMode.Create);
 using var documentDownloadStream = await documentDownloadResponse.Content.ReadAsStreamAsync();
 await documentDownloadStream.CopyToAsync(outputFileStream);  
 
 using var process = new Process();
-var programFilesx86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-process.StartInfo.FileName =
-	Path.Combine(programFilesx86, @"Google\Chrome\Application\chrome.exe");;
+process.StartInfo.UseShellExecute = true;
+process.StartInfo.WorkingDirectory =
+	Path.Combine(
+		Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
+		@"Google\Chrome\Application\");
+process.StartInfo.FileName = "chrome.exe";
 process.StartInfo.Arguments = fileDownloadPath;
 process.Start();
 process.WaitForExit();
