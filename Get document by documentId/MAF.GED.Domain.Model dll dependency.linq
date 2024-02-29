@@ -17,11 +17,7 @@ var document = await httpClient.GetFromJsonAsync<MAF.GED.Domain.Model.Document>(
 new {
 	document.DocumentId,
 	document.Libelle,
-	Famille = document.CategoriesFamille,
-	Cote = document.CategoriesCote,
-	TypeDocument = document.CategoriesTypeDocument,
-	document.CompteId,
-	document.PersonneId
+	document.Sens
 }.Dump();
 
 /*
