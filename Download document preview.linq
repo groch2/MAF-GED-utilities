@@ -27,9 +27,10 @@ using var downloadStream = await httpDownloadResponse.Content.ReadAsStreamAsync(
 await downloadStream.CopyToAsync(outputFileStream);  
 
 using var process = new Process();
-var programFilesx86 = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-process.StartInfo.FileName = Path.Combine(programFilesx86, @"Google\Chrome\Application\chrome.exe");;
+const string chromeDirectory = @"C:\Program Files\Google\Chrome\Application";
+process.StartInfo.FileName = Path.Combine(chromeDirectory, "chrome.exe");
 process.StartInfo.Arguments = fileDownloadPath;
+process.StartInfo.WorkingDirectory = chromeDirectory;
 process.Start();
 process.WaitForExit();
 process.Close();
