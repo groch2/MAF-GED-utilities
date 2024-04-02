@@ -7,6 +7,8 @@
   <Namespace>System.Threading.Tasks</Namespace>
 </Query>
 
+const string ENVIRONMENT_CODE = "int";
+const string apiVersion = "v2";
 Directory
 	.GetFiles(@"C:\Users\deschaseauxr\Documents\GED\Document de test")
 	.ToList()
@@ -15,8 +17,7 @@ Directory
 
 		// client http GED MAF
 		// https://api-ged-intra.int.maf.local/
-		var client = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/") };
-		const string apiVersion = "v2";
+		var client = new HttpClient { BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/") };
 
 		// upload document
 		"upload document début".Dump();

@@ -7,6 +7,7 @@
   <Namespace>System.Threading.Tasks</Namespace>
 </Query>
 
+const string ENVIRONMENT_CODE = "int";
 async Task Main() {
 	var documentMetadata = 
 		JsonSerializer.SerializeToNode(
@@ -30,7 +31,7 @@ async Task Main() {
 	}.Dump();
 }
 	
-const string gedApiAddress = "https://api-ged-intra.int.maf.local/v2/";
+const string gedApiAddress = $"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
 HttpClient gedApiHttpClient = new HttpClient { BaseAddress = new Uri(gedApiAddress) };
 async Task<string> UploadDocumentToGed(string filePath, JsonNode documentMetadata) {
 	var fileName = Path.GetFileName(filePath);

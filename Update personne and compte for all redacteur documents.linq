@@ -6,9 +6,10 @@
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
+const string ENVIRONMENT_CODE = "int";
 var httpClient =
 	new HttpClient {
-		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
+		BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/")
 	};
 var jsonDocuments =
 	await httpClient.GetStringAsync(

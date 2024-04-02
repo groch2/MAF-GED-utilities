@@ -9,6 +9,7 @@
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
+const string ENVIRONMENT_CODE = "int";
 async Task Main()
 {
 	const string documentId = "20240130102212266277270137";
@@ -42,7 +43,7 @@ async Task Main()
 
 HttpClient httpClient =
 	new HttpClient {
-		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/") };
+		BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/") };
 
 async Task<HttpResponseMessage> PatchDocument(string documentId, JsonNode documentPatch) {
 	//documentPatch["@odata.type"] = "MAF.GED.Domain.Model.Document";
