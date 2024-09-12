@@ -17,10 +17,13 @@ XElement
 	.Select(n =>
 		new {
 			Name = CapitalizeFirstLetter(n.Attribute("Name").Value),
-			Type = n.Attribute("Type").Value
+			//Type = n.Attribute("Type").Value,
+			Type = Regex.Replace(input: n.Attribute("Type").Value, pattern: @"\bEdm\.", replacement: string.Empty)
 		})
+	//.Where(p => p.Type.Contains("Date", StringComparison.OrdinalIgnoreCase))
+	//.Select(p => new { p.Name })
 	.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-	.ToArray()
 	.Dump();
+
 string CapitalizeFirstLetter(string input) =>
 	$"{$"{input[0]}".ToUpperInvariant()}{input.Substring(1)}";

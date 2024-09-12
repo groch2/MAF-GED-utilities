@@ -1,41 +1,40 @@
-<Query Kind="Statements">
-  <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
+<Query Kind="Program">
   <Namespace>System.Net.Http</Namespace>
+  <Namespace>System.Net.Http.Json</Namespace>
   <Namespace>System.Text.Json</Namespace>
+  <Namespace>System.Text.Json.Nodes</Namespace>
   <Namespace>System.Text.Json.Serialization</Namespace>
   <Namespace>System.Threading.Tasks</Namespace>
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
-var httpClient =
-	new HttpClient {
-		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
-	};
-var libelles = string.Join(',', File.ReadAllLines(@"C:\Users\deschaseauxr\AppData\Local\Temp\new 2.txt").Select(libelle => $"'{libelle}'"));
-var actual_documents = await httpClient.GetStringAsync($"?$filter=libelle in ({libelles})");
-var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-JsonDocument
-	.Parse(actual_documents)
-	.RootElement.GetProperty("value")
-	.EnumerateArray()
-	.Select(document => JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(document, jsonSerializerOptions))
-	.Select(document =>
-		new {
-			document.AssigneRedacteur,
-			document.CategoriesCote,
-			document.CategoriesFamille,
-			document.CategoriesTypeDocument,
-			document.CompteId,
-			document.DateDocument,
-			document.DocumentId,
-			document.Extension,
-			document.FichierNom,
-			document.Libelle,
-			document.PersonneId,
-		})
-	.OrderBy(document => document.DocumentId)
-	.Dump();
+const string webApiGedAddress = "https://api-ged-intra.int.maf.local/v2/Documents/";
+async Task Main()
+{
+	const string documentId = "20240306143954243038283375";
+	var documentPatch =
+System.Text.Json.JsonSerializer.SerializeToNode(System.Text.Json.JsonDocument.Parse(@"{""preview"": true,
+""modifiePar"": ""ROD""}"));
+	var patchDocumentResponse =
+		await PatchDocument(
+			documentId: documentId,
+			documentPatch: documentPatch);
+	new {
+		patchDocumentResponse.StatusCode,
+		patchDocumentResponse.ReasonPhrase
+	}.Dump();
+	patchDocumentResponse.EnsureSuccessStatusCode();	
+}
 
+HttpClient httpClient =
+	new HttpClient {
+		BaseAddress = new Uri(webApiGedAddress) };
+
+async Task<HttpResponseMessage> PatchDocument(string documentId, JsonNode documentPatch) {
+	var requestContent = JsonContent.Create(documentPatch);
+	return await httpClient.PatchAsync(documentId, requestContent);
+}
+	
 /*
 AssigneDepartement
 AssigneGroup
