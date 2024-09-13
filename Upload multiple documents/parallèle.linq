@@ -9,35 +9,40 @@
 
 const string ENVIRONMENT_CODE = "int";
 const string GED_API_ADDRESS =
-	//$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
-	"https://localhost:51691/v2/";
-const string FILE_PATH =
-	@"C:\Users\deschaseauxr\Documents\GED\upload_tiny_document.pdf";
+	$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
+	//"https://localhost:51691/v2/";
 async Task Main() {
-	var documentMetadata =
-		JsonSerializer.SerializeToNode(
-			new {
-				deposePar = "ROD",
-				dateDocument = DateTime.Now.ToUniversalTime(),
-				categoriesFamille = "DOCUMENTS CONTRAT",
-				categoriesCote = "AUTRES",
-				categoriesTypeDocument = "DIVERS",
-				canalId = 1,
-				libelle = GetRandomWord()
-			});
-	var documentId = 
-		await UploadDocumentToGed(
-			filePath: FILE_PATH,
-			documentMetadata: documentMetadata);
-	new {
-		documentId,
-		libelle = documentMetadata["libelle"].GetValue<string>()
-	}.Dump();
+	const string filePath = @"C:\Users\deschaseauxr\Documents\MAFlyDoc\test.pdf";
+	var documentMetadataJson =
+		new Func<JsonNode>(() => {
+			var documentMetadata = new {
+			  deposePar = "ROD",
+			  dateDocument = DateTime.Now.ToUniversalTime(),
+			  categoriesFamille = "DOCUMENTS CONTRAT",
+			  categoriesCote = "AUTRES",
+			  categoriesTypeDocument = "DIVERS",
+			  canalId = 1,
+			};
+			return JsonSerializer.SerializeToNode(documentMetadata);
+		})();
+	var uploadDocuments =
+		await Task.WhenAll(
+			Enumerable
+				.Range(0, 3)
+				.Select(async index => {
+					documentMetadataJson["libelle"] = $"{index + 1}-{GetRandomWord()}";
+					var documentId =
+						await UploadDocumentToGedAsync(
+							filePath: filePath,
+							documentMetadata: documentMetadataJson);
+					return documentId;
+				}));
+	uploadDocuments.Dump();
 }
 
-static HttpClient gedApiHttpClient =
+static readonly HttpClient gedApiHttpClient =
 	new HttpClient { BaseAddress = new Uri(GED_API_ADDRESS) };
-static async Task<string> UploadDocumentToGed(
+static async Task<string> UploadDocumentToGedAsync(
 	string filePath,
 	JsonNode documentMetadata) {
 	var fileName = Path.GetFileName(filePath);
@@ -83,21 +88,27 @@ static async Task<string> UploadDocumentToGed(
 		documentMetadata["fileId"] = documentUploadId;
 		documentMetadata["fichierNom"] = fileName;
 		documentMetadata.Dump();
-		using var documentUploadJson = JsonContent.Create(documentMetadata);
+		using var jsonContent = JsonContent.Create(documentMetadata);
 		using var response =
 			await gedApiHttpClient.PostAsync(
 				new Uri(
 					"finalizeUpload",
 					UriKind.Relative),
-				documentUploadJson);
-		response.EnsureSuccessStatusCode();
-		var uploadResponseContent = await response.Content.ReadAsStringAsync();
+				jsonContent);
+		try {
+			response.EnsureSuccessStatusCode();
+		} catch (Exception exception) {
+			exception.Dump();
+			throw;
+		}
+		var uploadResponseContent =
+			await response.Content.ReadAsStringAsync();
 		return JsonNode
 			.Parse(uploadResponseContent)["documentId"]
 			.GetValue<string>();
 	}
 }
 
-static Random dice = new Random();
-static string GetRandomWord(int length = 10) =>
-	new string(new int[length].Select(_ => (char)(dice.Next(26) + (int)'A')).ToArray());
+static readonly Random dice = new();
+static string GetRandomWord() =>
+	new string(new int[10].Select(_ => (char)(dice.Next(26) + (int)'A')).ToArray());
