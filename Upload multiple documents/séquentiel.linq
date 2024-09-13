@@ -25,20 +25,18 @@ void Main() {
 			};
 			return JsonSerializer.SerializeToNode(documentMetadata);
 		})();
-	var uploadDocuments =
-		Enumerable
-			.Range(0, 3)
-			.Select(index => {
-				documentMetadataJson["libelle"] = $"{index + 1}-{GetRandomWord()}";
-				var uploadDocumentTask =
-					UploadDocumentToGedAsync(
-						filePath: filePath,
-						documentMetadata: documentMetadataJson);
-				uploadDocumentTask.Wait();
-				var documentId = uploadDocumentTask.Result;
-				return documentId;
-			});
-	uploadDocuments.Dump();
+	var documentsIdList = new List<string>();
+	for (var index = 0; index < 3; index++) {
+		documentMetadataJson["libelle"] = $"{index + 1}-{GetRandomWord()}";
+		var uploadDocumentTask =
+			UploadDocumentToGedAsync(
+				filePath: filePath,
+				documentMetadata: documentMetadataJson);
+		uploadDocumentTask.Wait();
+		var documentId = uploadDocumentTask.Result;
+		documentsIdList.Add(documentId);
+	}
+	documentsIdList.Dump();
 }
 
 static readonly HttpClient gedApiHttpClient =
