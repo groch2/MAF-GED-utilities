@@ -13,24 +13,25 @@ const string GED_API_ADDRESS =
 	//"https://localhost:51691/v2/";
 async Task Main() {
 	const string filePath = @"C:\Users\deschaseauxr\Documents\MAFlyDoc\test.pdf";
-	var documentMetadataJson =
-		new Func<JsonNode>(() => {
-			var documentMetadata = new {
-			  deposePar = "ROD",
-			  dateDocument = DateTime.Now.ToUniversalTime(),
-			  categoriesFamille = "DOCUMENTS CONTRAT",
-			  categoriesCote = "AUTRES",
-			  categoriesTypeDocument = "DIVERS",
-			  canalId = 1,
-			};
-			return JsonSerializer.SerializeToNode(documentMetadata);
-		})();
+	var dateDocument = DateTime.Now.ToUniversalTime();
 	var uploadDocuments =
 		await Task.WhenAll(
 			Enumerable
-				.Range(0, 3)
+				.Range(0, 5)
 				.Select(async index => {
-					documentMetadataJson["libelle"] = $"{index + 1}-{GetRandomWord()}";
+					var documentMetadataJson =
+						new Func<JsonNode>(() => {
+							var documentMetadata = new {
+							  deposePar = "ROD",
+							  libelle = $"{index + 1}-{GetRandomWord()}",
+							  dateDocument = dateDocument,
+							  categoriesFamille = "DOCUMENTS CONTRAT",
+							  categoriesCote = "AUTRES",
+							  categoriesTypeDocument = "DIVERS",
+							  canalId = 1,
+							};
+							return JsonSerializer.SerializeToNode(documentMetadata);
+						})();
 					var documentId =
 						await UploadDocumentToGedAsync(
 							filePath: filePath,
@@ -77,7 +78,7 @@ static async Task<string> UploadDocumentToGedAsync(
 		request.Content = content;
 		using var response =
 			await gedApiHttpClient.SendAsync(request);
-		response.EnsureSuccessStatusCode();
+		CheckHttpResponse(response);
 		var responseContent =
 			await response.Content.ReadAsStringAsync();
 		var fileUploadId =
@@ -98,17 +99,21 @@ static async Task<string> UploadDocumentToGedAsync(
 					"finalizeUpload",
 					UriKind.Relative),
 				jsonContent);
-		try {
-			response.EnsureSuccessStatusCode();
-		} catch (Exception exception) {
-			exception.Dump();
-			throw;
-		}
+		CheckHttpResponse(response);
 		var uploadResponseContent =
 			await response.Content.ReadAsStringAsync();
 		return JsonNode
 			.Parse(uploadResponseContent)["documentId"]
 			.GetValue<string>();
+	}
+}
+
+static void CheckHttpResponse(HttpResponseMessage response) {
+	try {
+		response.EnsureSuccessStatusCode();
+	} catch (Exception exception) {
+		exception.Dump();
+		throw;
 	}
 }
 
