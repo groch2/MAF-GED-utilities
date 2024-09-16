@@ -1,0 +1,12 @@
+USE [GEDMAF]
+GO
+
+select id_doc
+	,link
+	,FichierOrigine
+	,DATE_INTEGRATION
+	,HEURE_NUM
+	,PREVIEW
+	,STATUS_INDEXATION
+from dbo.ARCHEAMAF
+where id_doc = '20240313100526605058271742'

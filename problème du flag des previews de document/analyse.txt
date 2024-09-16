@@ -1,0 +1,26 @@
+ImportFileWithMetadata --- Finished generating preview :OB=20240106-334/516 1.PDF with Ged Id : 20240306103208108015888677
+
+ImportFileWithMetadata --- Failed generating preview :OB=20240106-334/516 1.PDF with Ged Id : 20240306103208108015888677
+
+Une erreur est survenue lors de l'import du document '20240306103208108015888677'
+
+vérifier que le document a été inséré depuis le web service
+trouver des logs qui expliquent les timeout sur la base de données, pour les commandes lancées depuis le web service
+
+est ce que les lectures dans ARCHEAMAF depuis la web api GED sont bloquantes ?
+vérifier la durée du timeout de mise à jour de la preview, si il est trop court, il faut l'augmenter
+est la MàJ suite à la génération de preview est re-tentée en cas d'échec ?
+
+tester si le webservice actualise le flag preview après avoir généré la preview
+
+chercher des opérations de mise à jour de document en masse qui bloqueraient le web service GED
+
+Un document inséré en GED depuis le WEB service dont le flag preview n'est pas MàJ
+
+Severity	Code	Description	Project	File	Line	Suppression State
+Error	NETSDK1141	Unable to resolve the .NET SDK version as specified in the global.json located at C:\TeamProjects\GED_service\global.json.	MAF.GED.DataContracts	C:\Program Files\dotnet\sdk\8.0.200\Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.DefaultItems.targets	128	
+
+
+https://consoletfs.maf.local/MAF/MAF.GED/_git/GED%20SQL?path=/MAF.GED.Database/dbo/Stored%20Procedures/DocsWithoutPreview.sql&_a=contents&version=GBDev
+
+DeposeLe

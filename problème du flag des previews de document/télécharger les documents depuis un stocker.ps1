@@ -1,0 +1,1 @@
+Get-ChildItem "\\dnsintgedstocker01\Stockers\20240106\1"|?{$_.Name -notlike "*img"}|%{Copy-Item $_.FullName -Destination "C:\Users\deschaseauxr\Documents\GED\batch de génération de preview\surcharge de la RAM - plantage de OPCON\documents de test\"}

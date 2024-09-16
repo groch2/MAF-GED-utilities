@@ -7,6 +7,7 @@
 </Query>
 
 const string gedWebApiBaseAddress = "https://api-ged-intra.int.maf.local";
+//const string gedWebApiBaseAddress = "http://localhost:44363";
 var httpClient = new HttpClient {
 	BaseAddress = new Uri($"{gedWebApiBaseAddress}/v2/Documents/")
 };
