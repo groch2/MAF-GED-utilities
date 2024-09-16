@@ -58,7 +58,9 @@ static async Task<string> UploadDocumentToGedAsync(
 			documentMetadata: documentMetadata);
 	return documentId;
 
-	async Task<string> UploadFile(string filePath, string fileName) {
+	static async Task<string> UploadFile(
+		string filePath,
+		string fileName) {
 		await using var stream =
 			File.OpenRead(filePath);
 		using var request =
@@ -86,7 +88,7 @@ static async Task<string> UploadDocumentToGedAsync(
 		return fileUploadId;
 	}
 
-	async Task<string> FinalizeUpload(
+	static async Task<string> FinalizeUpload(
 		string fileUploadId,
 		string fileName,
 		JsonNode documentMetadata) {
@@ -106,14 +108,14 @@ static async Task<string> UploadDocumentToGedAsync(
 			.Parse(uploadResponseContent)["documentId"]
 			.GetValue<string>();
 	}
-}
 
-static void CheckHttpResponse(HttpResponseMessage response) {
-	try {
-		response.EnsureSuccessStatusCode();
-	} catch (Exception exception) {
-		exception.Dump();
-		throw;
+	static void CheckHttpResponse(HttpResponseMessage response) {
+		try {
+			response.EnsureSuccessStatusCode();
+		} catch (Exception exception) {
+			exception.Dump();
+			throw;
+		}
 	}
 }
 
