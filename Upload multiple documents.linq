@@ -7,18 +7,18 @@
   <Namespace>System.Threading.Tasks</Namespace>
 </Query>
 
+const string ENVIRONMENT_CODE = "hom";
 async Task Main() {
 	const string filePath = @"C:\Users\deschaseauxr\Documents\MAFlyDoc\test.pdf";
 	var documentMetadataJson =
 		new Func<JsonNode>(() => {
 			var documentMetadata = new {
 			  deposePar = "ROD",
-			  deposeLe = DateTime.Now.ToUniversalTime(),
+			  dateDocument = DateTime.Now.ToUniversalTime(),
 			  categoriesFamille = "DOCUMENTS CONTRAT",
 			  categoriesCote = "AUTRES",
 			  categoriesTypeDocument = "DIVERS",
 			  canalId = 1,
-			  compteId = 595804
 			};
 			return JsonSerializer.SerializeToNode(documentMetadata);
 		})();
@@ -27,8 +27,7 @@ async Task Main() {
 			Enumerable
 				.Range(0, 3)
 				.Select(async index => {
-					documentMetadataJson["libelle"] = $"{index}-{GetRandomWord()}";
-					documentMetadataJson.Dump();
+					documentMetadataJson["libelle"] = $"{index + 1}-{GetRandomWord()}";
 					var documentId =
 						await UploadDocumentToGed(
 							filePath: filePath,
@@ -39,7 +38,8 @@ async Task Main() {
 }
 
 const string gedApiAddress =
-	"https://api-ged-intra.int.maf.local/v2/";
+	$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
+	//"https://localhost:51691/v2/";
 static readonly HttpClient gedApiHttpClient =
 	new HttpClient { BaseAddress = new Uri(gedApiAddress) };
 static async Task<string> UploadDocumentToGed(
@@ -87,6 +87,7 @@ static async Task<string> UploadDocumentToGed(
 		JsonNode documentMetadata) {
 		documentMetadata["fileId"] = documentUploadId;
 		documentMetadata["fichierNom"] = fileName;
+		documentMetadata.Dump();
 		using var jsonContent = JsonContent.Create(documentMetadata);
 		using var response =
 			await gedApiHttpClient.PostAsync(
@@ -94,7 +95,12 @@ static async Task<string> UploadDocumentToGed(
 					"finalizeUpload",
 					UriKind.Relative),
 				jsonContent);
-		response.EnsureSuccessStatusCode();
+		try {
+			response.EnsureSuccessStatusCode();
+		} catch (Exception exception) {
+			exception.Dump();
+			throw;
+		}
 		var uploadResponseContent =
 			await response.Content.ReadAsStringAsync();
 		return JsonNode
@@ -103,7 +109,6 @@ static async Task<string> UploadDocumentToGed(
 	}
 }
 
-readonly Random dice = new();
-string GetRandomWord() {
-	return new string(new int[10].Select(_ => (char)(dice.Next(26) + (int)'A')).ToArray());
-}
+static readonly Random dice = new();
+static string GetRandomWord() =>
+	new string(new int[10].Select(_ => (char)(dice.Next(26) + (int)'A')).ToArray());

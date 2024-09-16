@@ -3,10 +3,10 @@ GO
 
 BEGIN TRANSACTION;
 
-DECLARE @CodeFamilleCible AS NVARCHAR(500) = 'GRANDS CHANTIERS'
-DECLARE @CodeCoteCible AS NVARCHAR(500) = 'GC'
+DECLARE @CodeFamilleCible AS NVARCHAR(500) = 'DOCUMENTS CONTRAT'
+DECLARE @CodeCoteCible AS NVARCHAR(500) = 'GESTION'
 
-DECLARE @CoteDocumentId_GC AS INT = (
+DECLARE @CoteDocumentId AS INT = (
 	SELECT [CoteDocumentId]
 	FROM [Ref].[CoteDocument]
 	JOIN [Ref].[FamilleDocument]
@@ -14,7 +14,7 @@ DECLARE @CoteDocumentId_GC AS INT = (
 	AND [FamilleDocument].[Code] = @CodeFamilleCible
 	WHERE [CoteDocument].[Code] = @CodeCoteCible
 )
-PRINT(CONCAT('Cote Document Id GC: ', @CoteDocumentId_GC))
+PRINT(CONCAT('Cote Document Id: ', @CoteDocumentId))
 
 DECLARE @NewTypeDocumentId AS INT =
 	(SELECT MAX([TypeDocumentId]) FROM [Ref].[TypeDocument]) + 1
@@ -31,9 +31,9 @@ INSERT INTO [Ref].[TypeDocument] (
 	[IsTimeline])
 VALUES (
 	  @NewTypeDocumentId
-	,'FICHE D ETABLISSEMENT'
-	,'fiche d''établissement'
-	,@CoteDocumentId_GC
+	,'AR POSTE'
+	,'AR posté'
+	,@CoteDocumentId
 	,1
 	,null
 	,null

@@ -9,9 +9,9 @@
 
 const string ENVIRONMENT_CODE = "int";
 const string GED_API_ADDRESS =
-	//$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
+	$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
 	//"http://localhost:44363/v2/";
-	"https://localhost:51691/v2/";
+	//"https://localhost:51691/v2/";
 async Task Main() {
 	const string filePath = @"C:\Users\deschaseauxr\Documents\MAFlyDoc\test.pdf";
 	var documentMetadataJson =
@@ -29,7 +29,7 @@ async Task Main() {
 	var uploadFilesList =
 		await Task.WhenAll(
 			Enumerable
-				.Range(0, 3)
+				.Range(0, 2)
 				.Select(async index => {
 					var uploadFileId = await UploadFile(filePath);
 					return new { uploadFileId, filePath };
@@ -37,23 +37,24 @@ async Task Main() {
 	var documentsIdList =
 		await Task.WhenAll(
 			uploadFilesList
-				.Select(async (uploadFile, index) => {
-				documentMetadataJson["libelle"] = $"{index + 1}-{GetRandomWord()}";
-				var documentId =
-					await FinalizeUpload(
-						documentUploadId: uploadFile.uploadFileId,
-						fileName: Path.GetFileName(uploadFile.filePath),
-						documentMetadata: documentMetadataJson);
-				return documentId;
-			}
-		));
+				.Select(
+					async (uploadFile, index) => {
+						documentMetadataJson["libelle"] = $"{index + 1}-{GetRandomWord()}";
+						var documentId =
+							await FinalizeUpload(
+								documentUploadId: uploadFile.uploadFileId,
+								fileName: Path.GetFileName(uploadFile.filePath),
+								documentMetadata: documentMetadataJson);
+						return documentId;
+					}
+				));
 	documentsIdList.Dump();
 }
 
 static readonly HttpClient gedApiHttpClient =
 	new HttpClient { BaseAddress = new Uri(GED_API_ADDRESS) };
 async Task<string> UploadFile(string filePath) {
-	await using var stream =
+	using var stream =
 		File.OpenRead(filePath);
 	using var request =
 		new HttpRequestMessage(
@@ -86,7 +87,6 @@ async Task<string> FinalizeUpload(
 	JsonNode documentMetadata) {
 	documentMetadata["fileId"] = documentUploadId;
 	documentMetadata["fichierNom"] = fileName;
-	documentMetadata.Dump();
 	using var jsonContent = JsonContent.Create(documentMetadata);
 	using var response =
 		await gedApiHttpClient.PostAsync(
