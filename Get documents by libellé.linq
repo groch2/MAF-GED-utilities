@@ -32,6 +32,17 @@ JsonDocument
 			document.FichierNom,
 			document.Libelle,
 			document.PersonneId,
+			document.DateNumerisation,
+			document.DeposeLe,
+			document.DeposePar,
+			document.VuLe,
+			document.VuPar,
+			document.QualiteValideeLe,
+			document.QualiteValideePar,
+			document.QualiteValideeValide,			
+			document.PeriodeValiditeDebut,
+			document.PeriodeValiditeFin,
+			document.TypeGarantie,
 		})
 	.OrderBy(document => document.DocumentId)
 	.Dump();

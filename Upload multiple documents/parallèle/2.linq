@@ -17,18 +17,24 @@ async Task Main() {
 	var uploadDocuments =
 		await Task.WhenAll(
 			Enumerable
-				.Range(0, 5)
+				.Range(0, 3)
 				.Select(async index => {
 					var documentMetadataJson =
 						new Func<JsonNode>(() => {
 							var documentMetadata = new {
-							  deposePar = "ROD",
-							  libelle = $"{index + 1}-{GetRandomWord()}",
-							  dateDocument = dateDocument,
-							  categoriesFamille = "DOCUMENTS CONTRAT",
-							  categoriesCote = "AUTRES",
-							  categoriesTypeDocument = "DIVERS",
-							  canalId = 1,
+								canalId = 1,
+								categoriesCote = "AUTRES",
+								categoriesFamille = "DOCUMENTS CONTRAT",
+								categoriesTypeDocument = "DIVERS",
+								chantierId = 2398,
+								dateDocument = dateDocument,
+								deposePar = "ROD",
+								libelle = $"{index + 1}-{GetRandomWord()}",
+								numeroContrat = "6928B",
+								periodeValiditeDebut = "1985-05-04",
+								periodeValiditeFin = "1995-02-21",
+								sens = "interne",
+								typeGarantie = "RCD/RCG",
 							};
 							return JsonSerializer.SerializeToNode(documentMetadata);
 						})();
