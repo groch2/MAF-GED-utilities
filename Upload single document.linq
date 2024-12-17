@@ -9,8 +9,8 @@
 
 const string ENVIRONMENT_CODE = "int";
 const string GED_API_ADDRESS =
-	//$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
-	"https://localhost:51691/v2/";
+	$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
+	//"https://localhost:51691/v2/";
 const string FILE_PATH =
 	@"C:\Users\deschaseauxr\Documents\GED\upload_tiny_document.pdf";
 async Task Main() {

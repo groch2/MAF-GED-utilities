@@ -1,5 +1,5 @@
 <Query Kind="Statements">
-  <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
+  <Reference>C:\TeamProjects\GED_API\MAF.GED.API.Host\bin\Debug\net8.0\MAF.GED.Domain.Model.dll</Reference>
   <Namespace>System.Data.SqlClient</Namespace>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
@@ -11,34 +11,40 @@
 
 var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/") };
 const string documentsIdListFile =
-	@"C:\Users\deschaseauxr\Documents\Document entrant - remplacer GED WS par web api GED\documents id list.txt";
+	@"C:\Users\deschaseauxr\Documents\GED\documentId list.txt";
 var documentsIdList =
-	string.Join(',', File.ReadAllLines(documentsIdListFile).Select(documentId => $"'{documentId}'"));
-var json_documents = await httpClient.GetStringAsync($"?$filter=documentId in ({documentsIdList})");
+	File.ReadAllLines(documentsIdListFile);
+const int requestUrlAndQueryLengthLimit = 2048;
+int baseUrlLength = httpClient.BaseAddress.AbsoluteUri.Length;
+const char separator = ',';
+const byte separatorLength = 1; // ","
+const int documentIdLength = 26; // "20241027021216767823360255".Length
+int nbDocumentsIdInEachGroup =
+    (requestUrlAndQueryLengthLimit - baseUrlLength) / (documentIdLength + separatorLength + 2);
 var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-JsonDocument
-	.Parse(json_documents)
-	.RootElement.GetProperty("value")
-	.EnumerateArray()
-	.Select(document =>
-		JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(
-			json: document.ToString(),
-			options: jsonSerializerOptions))
-	.Select(document =>
-		new {
-			document.AssigneRedacteur,
-			Famille = document.CategoriesFamille,
-			Cote = document.CategoriesCote,
-			TypeDoc = document.CategoriesTypeDocument,
-			document.CompteId,
-			document.DateDocument,
-			document.DocumentId,
-			document.FichierNom,
-			document.Libelle,
-			document.PersonneId,
-		})
-	.OrderBy(document => document.DocumentId)
-	.Dump();
+var documents =
+	(await Task.WhenAll(
+        documentsIdList
+        .Chunk(nbDocumentsIdInEachGroup)
+        .Select(async documentsIdList =>
+        {
+            var commaSeparatedDocumentsIdList = string.Join(separator, documentsIdList.Select(documentId => $"'{documentId}'"));
+			var queryString = $"?$filter=documentId in ({commaSeparatedDocumentsIdList})&$select=documentId";
+			//Environment.Exit(0);
+            var json_documents = await httpClient.GetStringAsync(queryString);
+			return 
+			JsonDocument
+				.Parse(json_documents)
+				.RootElement.GetProperty("value")
+				.EnumerateArray()
+				.Select(document =>
+					JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(
+						json: document.ToString(),
+						options: jsonSerializerOptions));
+        })))
+			.SelectMany(documents => documents.Select(document => document.DocumentId))
+			.OrderBy(documentId => documentId);
+documents.Dump();
 
 /*
 AssigneDepartement

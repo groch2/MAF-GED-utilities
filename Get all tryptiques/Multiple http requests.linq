@@ -8,7 +8,7 @@
 //typeof(TypeDocument).GetProperties().Select(p => $"TypeDocument{p.Name} = typeDocument.{p.Name},").Dump();
 //Environment.Exit(0);
 
-var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.hom.maf.local/v2/") };
+var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/") };
 var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
 var famillesListJsonResponse =
@@ -77,11 +77,14 @@ famillesList
 			//.Where(t => t.FamilleCode == "")
 			//.Where(t => t.CoteCode == "")
 			//.Where(t => t.TypeDocumentCode == "")
-			//.Select(t => new {
-			//	Famille = t.FamilleCode,
-			//	Cote = t.CoteCode,
-			//	TypeDocument = t.TypeDocumentCode
-			//})
+			.Select(t => new {
+				Famille = t.FamilleCode,
+				Cote = t.CoteCode,
+				TypeDocument = t.TypeDocumentCode
+			})
+			//.Where(t => t.Famille == "DOCUMENTS PERSONNE" && t.Cote == "IDENTITE")
+			//.Where(t => string.Equals(t.TypeDocument, "fausse attestation", StringComparison.OrdinalIgnoreCase))
+			.Where(t => Regex.Match(input: t.TypeDocument, pattern: "fausse", options: RegexOptions.IgnoreCase).Success)
 			.Dump();
 
 record Famille(int FamilleDocumentId, string Code, string Libelle);

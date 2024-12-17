@@ -7,33 +7,35 @@
   <Namespace>System.Threading.Tasks</Namespace>
 </Query>
 
+const string directory = @"C:\Users\deschaseauxr\Documents\Donum\documents de test d'insertion";
 const string ENVIRONMENT_CODE = "int";
 const string GED_API_ADDRESS =
 	$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
 	//"https://localhost:51691/v2/";
 async Task Main() {
-	const string filePath = @"C:\Users\deschaseauxr\Documents\MAFlyDoc\test.pdf";
-	var dateDocument = DateTime.Now.ToUniversalTime();
 	var uploadDocuments =
 		await Task.WhenAll(
-			Enumerable
-				.Range(0, 3)
-				.Select(async index => {
+			Directory
+				.GetFiles(directory)
+				.Select(async (filePath, index) => {
 					var documentMetadataJson =
 						new Func<JsonNode>(() => {
 							var documentMetadata = new {
-								canalId = 1,
+								assigneRedacteur = "ROD",
+								canalId = 30,
 								categoriesCote = "AUTRES",
 								categoriesFamille = "DOCUMENTS CONTRAT",
 								categoriesTypeDocument = "DIVERS",
 								chantierId = 2398,
-								dateDocument = dateDocument,
+								compteId = 1,
+								dateDocument = $"{DateTime.UtcNow.ToLocalTime():yyyy-MM-dd}",
 								deposePar = "ROD",
 								libelle = $"{index + 1}-{GetRandomWord()}",
 								numeroContrat = "6928B",
 								periodeValiditeDebut = "1985-05-04",
 								periodeValiditeFin = "1995-02-21",
 								sens = "interne",
+								statut = "INDEXE",
 								typeGarantie = "RCD/RCG",
 							};
 							return JsonSerializer.SerializeToNode(documentMetadata);
@@ -44,6 +46,9 @@ async Task Main() {
 							documentMetadata: documentMetadataJson);
 					return documentId;
 				}));
+	File.WriteAllLines(
+		path: @"C:\Users\deschaseauxr\Documents\GED\documentId list.txt",
+		contents: uploadDocuments);
 	new { uploadDocuments }.Dump();
 }
 

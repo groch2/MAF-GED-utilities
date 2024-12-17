@@ -13,7 +13,7 @@ Console.WriteLine("Enter documentId :");
 var documentId = Console.ReadLine();
 var downloadAddress = new Uri($"/{apiVersion}/download?documentId={documentId}", UriKind.Relative);
 using var downloadRequest = new HttpRequestMessage(HttpMethod.Get, downloadAddress);
-var httpDownloadResponse = await client.SendAsync(downloadRequest);
+using var httpDownloadResponse = await client.SendAsync(downloadRequest);
 var fileDownloadPath =
 	Path.Combine(
 		Path.GetTempPath(),
