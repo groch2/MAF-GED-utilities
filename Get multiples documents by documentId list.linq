@@ -1,5 +1,4 @@
 <Query Kind="Statements">
-  <Reference>C:\TeamProjects\GED_API\MAF.GED.API.Host\bin\Debug\net8.0\MAF.GED.Domain.Model.dll</Reference>
   <Namespace>System.Data.SqlClient</Namespace>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
@@ -42,12 +41,12 @@ var documents =
 						//AssigneRedacteur = jsonNode["assigneRedacteur"]?.ToString(),
 						DocumentId = jsonNode["documentId"]?.ToString(),
 						Libelle = jsonNode["libelle"]?.ToString(),
-						Commentaire = jsonNode["commentaire"]?.ToString(),
+						//Commentaire = jsonNode["commentaire"]?.ToString(),
 						//TypeGarantie = jsonNode["typeGarantie"]?.ToString(),
 						//FichierNom = jsonNode["fichierNom"]?.ToString(),
-						//Famille = jsonNode["categoriesFamille"]?.ToString(),
-						//Côte = jsonNode["categoriesCote"]?.ToString(),
-						//TypeDocument = jsonNode["categoriesTypeDocument"]?.ToString(),
+						Famille = jsonNode["categoriesFamille"]?.ToString(),
+						Côte = jsonNode["categoriesCote"]?.ToString(),
+						TypeDocument = jsonNode["categoriesTypeDocument"]?.ToString(),
 						//DeposeLe = GetDateOnly(jsonNode["deposeLe"]?.GetValue<DateTime>()),
 						//DeposePar = jsonNode["deposePar"]?.ToString(),
 						//VuLe = GetDateOnly(jsonNode["vuLe"]?.GetValue<DateTime>()),
@@ -62,8 +61,8 @@ var documents =
 						//NumeroContrat = jsonNode["numeroContrat"]?.ToString(),
 						//ChantierId = jsonNode["chantierId"]?.ToString(),
 						//AssureurId = jsonNode["assureurId"]?.ToString(),
-						//CompteId = jsonNode["compteId"]?.ToString(),
-						//PersonneId = jsonNode["personneId"]?.ToString(),
+						CompteId = jsonNode["compteId"]?.ToString(),
+						PersonneId = jsonNode["personneId"]?.ToString(),
 						//Sens = jsonNode["sens"]?.ToString(),
 						//Important = jsonNode["important"]?.ToString(),
 						//PeriodeValiditeDebut = GetDateOnly(jsonNode["periodeValiditeDebut"]?.GetValue<DateTime>()),
