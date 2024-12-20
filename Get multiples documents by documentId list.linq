@@ -9,7 +9,7 @@
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
-var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/") };
+var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.hom.maf.local/v2/Documents/") };
 const string documentsIdListFile =
 	@"C:\Users\deschaseauxr\Documents\GED\documentId list.txt";
 var documentsIdList =
@@ -21,7 +21,6 @@ const byte separatorLength = 1; // ","
 const int documentIdLength = 26; // "20241027021216767823360255".Length
 int nbDocumentsIdInEachGroup =
     (requestUrlAndQueryLengthLimit - baseUrlLength) / (documentIdLength + separatorLength + 2);
-var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 var documents =
 	(await Task.WhenAll(
         documentsIdList
@@ -37,13 +36,43 @@ var documents =
 				.Parse(json_documents)
 				.RootElement.GetProperty("value")
 				.EnumerateArray()
-				.Select(document =>
-					JsonSerializer.Deserialize<MAF.GED.Domain.Model.Document>(
-						json: document.ToString(),
-						options: jsonSerializerOptions));
-        })))
-			.SelectMany(documents => documents.Select(document => document.DocumentId))
-			.OrderBy(documentId => documentId);
+				.Select(jsonElement => JsonNode.Parse(jsonElement.ToString()))
+				.Select(jsonNode =>
+					new {
+						//AssigneRedacteur = jsonNode["assigneRedacteur"]?.ToString(),
+						DocumentId = jsonNode["documentId"]?.ToString(),
+						Libelle = jsonNode["libelle"]?.ToString(),
+						Commentaire = jsonNode["commentaire"]?.ToString(),
+						//TypeGarantie = jsonNode["typeGarantie"]?.ToString(),
+						//FichierNom = jsonNode["fichierNom"]?.ToString(),
+						//Famille = jsonNode["categoriesFamille"]?.ToString(),
+						//Côte = jsonNode["categoriesCote"]?.ToString(),
+						//TypeDocument = jsonNode["categoriesTypeDocument"]?.ToString(),
+						//DeposeLe = GetDateOnly(jsonNode["deposeLe"]?.GetValue<DateTime>()),
+						//DeposePar = jsonNode["deposePar"]?.ToString(),
+						//VuLe = GetDateOnly(jsonNode["vuLe"]?.GetValue<DateTime>()),
+						//VuPar = jsonNode["vuPar"]?.ToString(),
+						//QualiteValideeLe = GetDateOnly(jsonNode["qualiteValideeLe"]?.GetValue<DateTime>()),
+						//QualiteValideePar = jsonNode["qualiteValideePar"]?.ToString(),
+						//QualiteValideeValide = jsonNode["qualiteValideeValide"]?.ToString(),
+						//TraiteLe = GetDateOnly(jsonNode["traiteLe"]?.GetValue<DateTime>()),
+						//TraitePar = jsonNode["traitePar"]?.ToString(),
+						//ModifieLe = GetDateOnly(jsonNode["modifieLe"]?.GetValue<DateTime>()),
+						//ModifiePar = jsonNode["modifiePar"]?.ToString(),
+						//NumeroContrat = jsonNode["numeroContrat"]?.ToString(),
+						//ChantierId = jsonNode["chantierId"]?.ToString(),
+						//AssureurId = jsonNode["assureurId"]?.ToString(),
+						//CompteId = jsonNode["compteId"]?.ToString(),
+						//PersonneId = jsonNode["personneId"]?.ToString(),
+						//Sens = jsonNode["sens"]?.ToString(),
+						//Important = jsonNode["important"]?.ToString(),
+						//PeriodeValiditeDebut = GetDateOnly(jsonNode["periodeValiditeDebut"]?.GetValue<DateTime>()),
+						//PeriodeValiditeFin = GetDateOnly(jsonNode["periodeValiditeFin"]?.GetValue<DateTime>()),
+						//Statut = jsonNode["statut"]?.ToString()
+					});
+		        })))
+			.SelectMany(documents => documents)
+			.OrderBy(document => document.DocumentId);
 documents.Dump();
 
 /*
