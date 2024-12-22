@@ -12,20 +12,19 @@ var httpClient =
 	new HttpClient {
 		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
 	};
-var documentPatch =
-	JsonSerializer.SerializeToNode(
-		new {
-			CategoriesFamille = "DOCUMENTS ENTRANTS",
-			CategoriesCote = "AUTRES",
-			CategoriesTypeDocument = "DIVERS",
-			ModifiePar = "toto"
-		});
 var patchDocumentsResponses =
 	await Task.WhenAll(
 		File
 			.ReadAllLines(@"C:\Users\deschaseauxr\Documents\GED\documentId list.txt")
-			.Select(async documentId => {
-				var patchDocumentResponse = await PatchSingleDocument(documentId, documentPatch);
+			.Select(async (documentId, index) => {
+				var documentPatch =
+					JsonSerializer.SerializeToNode(
+						new {
+							ModifiePar = "ROD",
+							Libelle = $"KBIS {index + 1}"
+						});			
+				var patchDocumentResponse =
+					await PatchSingleDocument(documentId, documentPatch);
 				patchDocumentResponse.EnsureSuccessStatusCode();
 				return patchDocumentResponse;
 			}));
