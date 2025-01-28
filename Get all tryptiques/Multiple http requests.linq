@@ -2,6 +2,7 @@
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
   <Namespace>System.Threading.Tasks</Namespace>
+  <RemoveNamespace>System.Text.RegularExpressions</RemoveNamespace>
 </Query>
 
 async static Task Main() {
@@ -85,15 +86,16 @@ async static Task Main() {
 						Id = t.CoteId,
 						Code = t.CoteCode,
 					},
-					Type = new {
+					TypeDocument = new {
 						Id = t.TypeDocumentId,
 						Code = t.TypeDocumentCode
 					},
 				})
 				.Where(t =>
-					AreStringEqualCaseInsensitive(t.Famille.Code, "DOCUMENTS EMOA") && 
-					AreStringEqualCaseInsensitive(t.Cote.Code, "GESTION"))
-				//.Where(t => t.TypeDocument.Contains("fausse", StringComparison.OrdinalIgnoreCase))
+					//AreStringEqualCaseInsensitive(t.Famille.Code, "DOCUMENTS EMOA") && 
+					//AreStringEqualCaseInsensitive(t.Cote.Code, "GESTION") &&
+					AreStringEqualCaseInsensitive(t.TypeDocument.Code, "AR POSTE"))
+				//.Where(t => t.TypeDocument.Contains("fausse", StringComparison.OrdinalIgnoreCase)
 				.Dump();
 }
 
