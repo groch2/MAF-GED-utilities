@@ -8,9 +8,9 @@ DECLARE @CodeCoteCible AS NVARCHAR(500) = 'GESTION'
 
 DECLARE @CoteDocumentId AS INT = (
 	SELECT [CoteDocumentId]
-	FROM [Ref].[CoteDocument]
-	JOIN [Ref].[FamilleDocument]
-	ON [CoteDocument].[FamilleDocumentId] = [FamilleDocument].[FamilleDocumentId]
+	FROM [Ref].[FamilleDocument]
+	JOIN [Ref].[CoteDocument]
+	ON [FamilleDocument].[FamilleDocumentId] = [CoteDocument].[FamilleDocumentId]
 	AND [FamilleDocument].[Code] = @CodeFamilleCible
 	WHERE [CoteDocument].[Code] = @CodeCoteCible
 )

@@ -41,12 +41,14 @@ async Task Main() {
 static readonly Random dice = new Random();
 static string get_random_word(int length) =>
 	new string(new int[length].Select(_ => (char)(dice.Next(26) + (int)'A')).ToArray());
+
 static async Task<HttpResponseMessage> PatchSingleDocument(
 	string documentId, 
 	JsonNode documentPatch) {
 		using var requestContent = JsonContent.Create(documentPatch);
 		return await httpClient.PatchAsync(documentId, requestContent);
 }
+
 static readonly HttpClient httpClient =
 	new HttpClient {
 		BaseAddress = new Uri($"https://api-ged-intra.{environment}.maf.local/v2/Documents/")
