@@ -10,7 +10,7 @@ const string gedWebApiBaseAddress = "https://api-ged-intra.int.maf.local";
 var httpClient = new HttpClient {
 	BaseAddress = new Uri(gedWebApiBaseAddress)
 };
-var responseContent = await httpClient.GetStringAsync("/v2/Documents/?$filter=deposePar eq 'ROD'&$orderBy=deposeLe desc&$select=documentId,libelle&$top=10");
+var responseContent = await httpClient.GetStringAsync("/v2/Documents/?$filter=deposePar eq 'ROD'&$orderBy=deposeLe desc&$select=documentId,libelle,deposeLe&$top=10");
 JsonDocument
 	.Parse(responseContent)
 	.RootElement
@@ -20,7 +20,10 @@ JsonDocument
 		node =>
 			new {
 				DocumentId = node.GetProperty("documentId").GetString(),
-				Libelle = node.GetProperty("libelle").GetString()
+				Libelle = node.GetProperty("libelle").GetString(),
+				DeposeLe = GetDateOnly(node.GetProperty("deposeLe").GetDateTime()),
 			}
 	).Dump();
 
+static DateOnly? GetDateOnly(DateTime? date) =>
+	date.HasValue ? DateOnly.FromDateTime(date.Value): (DateOnly?)null;
