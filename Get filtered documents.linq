@@ -1,11 +1,8 @@
 <Query Kind="Statements">
-  <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
-  <Reference>C:\TeamProjects\MAFlyDoc\MAFlyDoc\MAFlyDoc.WebApi\bin\Debug\net6.0\Newtonsoft.Json.dll</Reference>
-  <Namespace>System.Data.SqlClient</Namespace>
+  <Reference>C:\TeamProjects\GED_API\MAF.GED.API.Host\bin\Debug\net8.0\MAF.GED.Domain.Model.dll</Reference>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
-  <Namespace>System.Text.Json.Serialization</Namespace>
-  <Namespace>System.Threading.Tasks</Namespace>
+  <Namespace>System.Text.Json.Nodes</Namespace>
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
@@ -15,21 +12,46 @@ var httpClient =
 	};
 var raw_responses =
 	await httpClient.GetStringAsync(
-		$"?$filter=categoriesFamille eq 'Documents entrants' and statut eq 'INDEXE'&$count=true&$top=0");
+		$"?$filter=statut eq 'INDEXE' and categoriesFamille in ('DOCUMENTS CONTRAT','DOCUMENTS EMOA','DOCUMENTS PERSONNES')&$top=1");
 var documents =
 	JsonDocument
 		.Parse(raw_responses)
-		.RootElement.GetProperty("value")
+		.RootElement
+		.GetProperty("value")
 		.EnumerateArray()
-		.Select(document => Newtonsoft.Json.JsonConvert.DeserializeObject<MAF.GED.Domain.Model.Document>($"{document}"))
-		.Select(document =>
+		.Select(jsonElement => JsonNode.Parse(jsonElement.ToString()))
+		.Select(jsonNode =>
 			new {
-				document.DocumentId,
-				document.Libelle,
-				document.Statut,
-				document.ModifiePar,
-				document.CategoriesFamille,
-				document.CategoriesCote,
-				document.CategoriesTypeDocument
-			});
+				DocumentId = jsonNode["documentId"]?.ToString(),
+				Libelle = jsonNode["libelle"]?.ToString(),
+				CompteId = jsonNode["compteId"]?.ToString(),
+				PersonneId = jsonNode["personneId"]?.ToString(),
+				Famille = jsonNode["categoriesFamille"]?.ToString(),
+				Côte = jsonNode["categoriesCote"]?.ToString(),
+				TypeDocument = jsonNode["categoriesTypeDocument"]?.ToString(),
+				//AssigneRedacteur = jsonNode["assigneRedacteur"]?.ToString(),
+				//DeposeLe = GetDateOnly(jsonNode["deposeLe"]?.GetValue<DateTime>()),
+				//DeposePar = jsonNode["deposePar"]?.ToString(),
+				//ModifieLe = GetDateOnly(jsonNode["modifieLe"]?.GetValue<DateTime>()),
+				//ModifiePar = jsonNode["modifiePar"]?.ToString(),
+				//VuLe = GetDateOnly(jsonNode["vuLe"]?.GetValue<DateTime>()),
+				//VuPar = jsonNode["vuPar"]?.ToString(),
+				//QualiteValideeLe = GetDateOnly(jsonNode["qualiteValideeLe"]?.GetValue<DateTime>()),
+				//QualiteValideePar = jsonNode["qualiteValideePar"]?.ToString(),
+				//QualiteValideeValide = jsonNode["qualiteValideeValide"]?.ToString(),
+				//TraiteLe = GetDateOnly(jsonNode["traiteLe"]?.GetValue<DateTime>()),
+				//TraitePar = jsonNode["traitePar"]?.ToString(),
+				//PeriodeValiditeDebut = GetDateOnly(jsonNode["periodeValiditeDebut"]?.GetValue<DateTime>()),
+				//PeriodeValiditeFin = GetDateOnly(jsonNode["periodeValiditeFin"]?.GetValue<DateTime>()),
+				//FichierNom = jsonNode["fichierNom"]?.ToString(),
+				//TypeGarantie = jsonNode["typeGarantie"]?.ToString(),
+				//NumeroContrat = jsonNode["numeroContrat"]?.ToString(),
+				//ChantierId = jsonNode["chantierId"]?.ToString(),
+				//Commentaire = jsonNode["commentaire"]?.ToString(),
+				//AssureurId = jsonNode["assureurId"]?.ToString(),
+				//Statut = jsonNode["statut"]?.ToString()
+				//QueueStatus = GetDocumentStatus(jsonNode)
+				//Sens = jsonNode["sens"]?.ToString(),
+				//Important = jsonNode["important"]?.ToString(),
+		});
 documents.Dump();
