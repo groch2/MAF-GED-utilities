@@ -5,13 +5,14 @@
   <RemoveNamespace>System.Text.RegularExpressions</RemoveNamespace>
 </Query>
 
+const string ENVIRONMENT_CODE = "int";
 async static Task Main() {
 	//typeof(Famille).GetProperties().Select(p => $"Famille{p.Name} = famille.{p.Name},").Dump();
 	//typeof(Cote).GetProperties().Select(p => $"Cote{p.Name} = cote.{p.Name},").Dump();
 	//typeof(TypeDocument).GetProperties().Select(p => $"TypeDocument{p.Name} = typeDocument.{p.Name},").Dump();
 	//Environment.Exit(0);
 
-	var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/") };
+	var httpClient = new HttpClient { BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/") };
 	var jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
 	var famillesListJsonResponse =
@@ -27,7 +28,7 @@ async static Task Main() {
 				jsonSerializerOptions));
 
 	var cotesListJsonResponse =
-		await httpClient.GetStringAsync("Cotes?$select=coteDocumentId,code,libelle,familleDocumentId&$filter=isActif eq true");
+		await httpClient.GetStringAsync("Cotes?$select=coteDocumentId,code,codeCouleur,libelle,familleDocumentId&$filter=isActif eq true");
 	var cotesList =
 		JsonDocument
 			.Parse(cotesListJsonResponse)
@@ -85,17 +86,21 @@ async static Task Main() {
 					//AreStringEqualCaseInsensitive(t.Famille.Code, "DOCUMENTS EMOA") && 
 					//AreStringEqualCaseInsensitive(t.Cote.Code, "GESTION") &&
 					//AreStringEqualCaseInsensitive(t.TypeDocument.Code, "AR POSTE"))
+				.Select(t =>
+					new {
+						Famille = t.Famille.Code,
+						Cote = t.Cote.Code,
+						TypeDocument = t.TypeDocument.Code,
+					})
 				//.Where(t => t.TypeDocument.Contains("fausse", StringComparison.OrdinalIgnoreCase)
-				.Select(t => new {
-					Famille = t.Famille.Code,
-					Côte = t.Cote.Code,
-					TypeDocument = t.TypeDocument.Code 
-				})
+				//.Where(t =>
+				//	AreStringEqualCaseInsensitive(t.Famille, "DOCUMENTS CONTRAT") ||
+				//	AreStringEqualCaseInsensitive(t.Famille, "DOCUMENTS PAPS"))
 				.Dump();
 }
 
 record Famille(int FamilleDocumentId, string Code, string Libelle);
-record Cote(int CoteDocumentId, string Code, string Libelle, int FamilleDocumentId);
+record Cote(int CoteDocumentId, string Code, string CodeCouleur, string Libelle, int FamilleDocumentId);
 record TypeDocument(int TypeDocumentId, string Code, string Libelle, int CoteDocumentId);
 record TriptyqueItem(int Id, string Code, string Libellé);
 
