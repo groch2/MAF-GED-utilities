@@ -1,5 +1,4 @@
 <Query Kind="Program">
-  <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Net.Http.Json</Namespace>
   <Namespace>System.Text.Json</Namespace>

@@ -8,7 +8,8 @@
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
-var httpClient = new HttpClient { BaseAddress = new Uri("https://api-ged-intra.hom.maf.local/v2/Documents/") };
+const string ENVIRONMENT_CODE = "hom";
+var httpClient = new HttpClient { BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/") };
 const string documentsIdListFile =
 	@"C:\Users\deschaseauxr\Documents\GED\documentId list.txt";
 var documentsIdList =

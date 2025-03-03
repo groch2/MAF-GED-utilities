@@ -1,5 +1,5 @@
 <Query Kind="Statements">
-  <Reference>C:\TeamProjects\GED API\MAF.GED.API.Host\bin\Debug\net6.0\MAF.GED.Domain.Model.dll</Reference>
+  <Reference>C:\TeamProjects\GED_API\MAF.GED.API.Host\bin\Debug\net8.0\MAF.GED.Domain.Model.dll</Reference>
   <Namespace>System.Net.Http</Namespace>
   <Namespace>System.Text.Json</Namespace>
   <Namespace>System.Text.Json.Serialization</Namespace>
