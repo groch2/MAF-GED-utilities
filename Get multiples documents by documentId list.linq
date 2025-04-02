@@ -17,8 +17,8 @@ async Task Main() {
 }
 
 const string ENVIRONMENT_CODE = "int";
-readonly HttpClient mafGedHttpClient = new HttpClient { BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/") };
-async Task<IEnumerable<Dictionary<DocProperty, object>>> GetDocumentsByDocumentsIdList(IEnumerable<string> documentsIdList) {
+static readonly HttpClient mafGedHttpClient = new HttpClient { BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/") };
+static async Task<IEnumerable<Dictionary<DocProperty, object>>> GetDocumentsByDocumentsIdList(IEnumerable<string> documentsIdList) {
 	var nbDocumentsIdInEachGroup = GetNbDocumentsIdInEachGroup();
 	const char separator = ',';
 	var documents =
@@ -29,11 +29,11 @@ async Task<IEnumerable<Dictionary<DocProperty, object>>> GetDocumentsByDocuments
 	            var commaSeparatedDocumentsIdList = string.Join(separator, documentsIdList.Select(documentId => $"'{documentId}'"));
 				var queryString = $"?$filter=documentId in ({commaSeparatedDocumentsIdList})&$select=assigneRedacteur,assureurId,canalPrincipal,categoriesCote,categoriesFamille,categoriesTypeDocument,chantierId,codeOrigine,commentaire,compteId,dateDocument,dateNumerisation,deposeLe,deposePar,docn,documentId,extension,fichierNom,fichierNombrePages,fichierTaille,heureNumerisation,horodatage,important,libelle,modifieLe,modifiePar,numeroGc,numeroSinistre,periodeValiditeDebut,periodeValiditeFin,personneId,presenceAr,previewLink,qualiteValideeLe,qualiteValideePar,qualiteValideeValide,regroupementId,sens,sousDossierSinistre,statut,traiteLe,traitePar,typeGarantie,vuLe,vuPar";
 				//Environment.Exit(0);
-	            var json_documents = await mafGedHttpClient.GetStringAsync(queryString);
-				return 
-				JsonDocument
-					.Parse(json_documents)
-					.RootElement.GetProperty("value")
+	            var responseContent = await mafGedHttpClient.GetStringAsync(queryString);
+				return JsonDocument
+					.Parse(responseContent)
+					.RootElement
+					.GetProperty("value")
 					.EnumerateArray()
 					.Select(jsonElement => JsonNode.Parse(jsonElement.ToString()))
 					.Select(jsonNode =>
