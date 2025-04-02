@@ -17,8 +17,8 @@ async Task Main() {
 }
 
 const string ENVIRONMENT_CODE = "int";
-HttpClient httpClient = new HttpClient { BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/") };
-async Task<IEnumerable<Dictionary<string, object>>> GetDocumentsByDocumentsIdList(IEnumerable<string> documentsIdList) {
+readonly HttpClient httpClient = new HttpClient { BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/") };
+async Task<IEnumerable<Dictionary<DocProperty, object>>> GetDocumentsByDocumentsIdList(IEnumerable<string> documentsIdList) {
 	var nbDocumentsIdInEachGroup = GetNbDocumentsIdInEachGroup();
 	const char separator = ',';
 	var documents =
@@ -37,44 +37,42 @@ async Task<IEnumerable<Dictionary<string, object>>> GetDocumentsByDocumentsIdLis
 					.EnumerateArray()
 					.Select(jsonElement => JsonNode.Parse(jsonElement.ToString()))
 					.Select(jsonNode =>
-						new Dictionary<string, object> {
-							{ "AssigneRedacteur", jsonNode["assigneRedacteur"]?.ToString() },
-							{ "DocumentId", jsonNode["documentId"]?.ToString() },
-							{ "Libelle", jsonNode["libelle"]?.ToString() },
-							//{ "Commentaire", jsonNode["commentaire"]?.ToString() },
-							//{ "TypeGarantie", jsonNode["typeGarantie"]?.ToString() },
-							//{ "FichierNom", jsonNode["fichierNom"]?.ToString() },
-							{ "Famille", jsonNode["categoriesFamille"]?.ToString() },
-							{ "Côte", jsonNode["categoriesCote"]?.ToString() },
-							{ "TypeDocument", jsonNode["categoriesTypeDocument"]?.ToString() },
-							//{ "DeposeLe", GetDateOnly(jsonNode["deposeLe"]?.GetValue<DateTime>()) },
-							//{ "DeposePar", jsonNode["deposePar"]?.ToString() },
-							//{ "VuLe", GetDateOnly(jsonNode["vuLe"]?.GetValue<DateTime>()) },
-							//{ "VuPar", jsonNode["vuPar"]?.ToString() },
-							//{ "QualiteValideeLe", GetDateOnly(jsonNode["qualiteValideeLe"]?.GetValue<DateTime>()) },
-							//{ "QualiteValideePar", jsonNode["qualiteValideePar"]?.ToString() },
-							//{ "QualiteValideeValide", jsonNode["qualiteValideeValide"]?.ToString() },
-							//{ "TraiteLe", GetDateOnly(jsonNode["traiteLe"]?.GetValue<DateTime>()) },
-							//{ "TraitePar", jsonNode["traitePar"]?.ToString() },
-							//{ "ModifieLe", GetDateOnly(jsonNode["modifieLe"]?.GetValue<DateTime>()) },
-							//{ "ModifiePar", jsonNode["modifiePar"]?.ToString() },
-							//{ "NumeroContrat", jsonNode["numeroContrat"]?.ToString() },
-							{ "NumeroSinistre", jsonNode["numeroSinistre"]?.ToString() },
-							//{ "ChantierId", jsonNode["chantierId"]?.ToString() },
-							//{ "AssureurId", jsonNode["assureurId"]?.ToString() },
-							{ "CompteId", jsonNode["compteId"]?.ToString() },
-							{ "PersonneId", jsonNode["personneId"]?.ToString() },
-							//{ "Sens", jsonNode["sens"]?.ToString() },
-							//{ "SousDossierSinistre", jsonNode["sousDossierSinistre"]?.ToString() },
-							//{ "Important", jsonNode["important"]?.ToString() },
-							//{ "PeriodeValiditeDebut", GetDateOnly(jsonNode["periodeValiditeDebut"]?.GetValue<DateTime>()) },
-							//{ "PeriodeValiditeFin", GetDateOnly(jsonNode["periodeValiditeFin"]?.GetValue<DateTime>()),
-							//{ "Statut", jsonNode["statut"]?.ToString() }
+						new Dictionary<DocProperty, object> {
+							{ DocProperty.AssigneRedacteur, jsonNode["assigneRedacteur"]?.ToString() },
+							{ DocProperty.DocumentId, jsonNode["documentId"]?.ToString() },
+							{ DocProperty.Libelle, jsonNode["libelle"]?.ToString() },
+							{ DocProperty.Commentaire, jsonNode["commentaire"]?.ToString() },
+							{ DocProperty.TypeGarantie, jsonNode["typeGarantie"]?.ToString() },
+							{ DocProperty.FichierNom, jsonNode["fichierNom"]?.ToString() },
+							{ DocProperty.Famille, jsonNode["categoriesFamille"]?.ToString() },
+							{ DocProperty.Côte, jsonNode["categoriesCote"]?.ToString() },
+							{ DocProperty.TypeDocument, jsonNode["categoriesTypeDocument"]?.ToString() },
+							{ DocProperty.DeposeLe, GetDateOnly(jsonNode["deposeLe"]?.GetValue<DateTime>()) },
+							{ DocProperty.DeposePar, jsonNode["deposePar"]?.ToString() },
+							{ DocProperty.VuLe, GetDateOnly(jsonNode["vuLe"]?.GetValue<DateTime>()) },
+							{ DocProperty.VuPar, jsonNode["vuPar"]?.ToString() },
+							{ DocProperty.QualiteValideeLe, GetDateOnly(jsonNode["qualiteValideeLe"]?.GetValue<DateTime>()) },
+							{ DocProperty.QualiteValideePar, jsonNode["qualiteValideePar"]?.ToString() },
+							{ DocProperty.QualiteValideeValide, jsonNode["qualiteValideeValide"]?.ToString() },
+							{ DocProperty.TraiteLe, GetDateOnly(jsonNode["traiteLe"]?.GetValue<DateTime>()) },
+							{ DocProperty.TraitePar, jsonNode["traitePar"]?.ToString() },
+							{ DocProperty.ModifieLe, GetDateOnly(jsonNode["modifieLe"]?.GetValue<DateTime>()) },
+							{ DocProperty.ModifiePar, jsonNode["modifiePar"]?.ToString() },
+							{ DocProperty.NumeroContrat, jsonNode["numeroContrat"]?.ToString() },
+							{ DocProperty.NumeroSinistre, jsonNode["numeroSinistre"]?.ToString() },
+							{ DocProperty.ChantierId, jsonNode["chantierId"]?.ToString() },
+							{ DocProperty.AssureurId, jsonNode["assureurId"]?.ToString() },
+							{ DocProperty.CompteId, jsonNode["compteId"]?.ToString() },
+							{ DocProperty.PersonneId, jsonNode["personneId"]?.ToString() },
+							{ DocProperty.Sens, jsonNode["sens"]?.ToString() },
+							{ DocProperty.SousDossierSinistre, jsonNode["sousDossierSinistre"]?.ToString() },
+							{ DocProperty.Important, jsonNode["important"]?.ToString() },
+							{ DocProperty.PeriodeValiditeDebut, GetDateOnly(jsonNode["periodeValiditeDebut"]?.GetValue<DateTime>()) },
+							{ DocProperty.PeriodeValiditeFin, GetDateOnly(jsonNode["periodeValiditeFin"]?.GetValue<DateTime>()) },
+							{ DocProperty.Statut, jsonNode["statut"]?.ToString() }
 						});
 			        })))
-				.SelectMany(documents => documents)
-				.OrderBy(document => document["DocumentId"])
-				.ToArray();
+				.SelectMany(documents => documents);
 	return documents;
 	
 	int GetNbDocumentsIdInEachGroup() {
@@ -86,6 +84,44 @@ async Task<IEnumerable<Dictionary<string, object>>> GetDocumentsByDocumentsIdLis
 		    (requestUrlAndQueryLengthLimit - baseUrlLength) / (documentIdLength + separatorLength + 2);
 		return nbDocumentsIdInEachGroup;
 	}
+	
+	DateOnly? GetDateOnly(DateTime? dateTime) =>
+		dateTime.HasValue ? DateOnly.FromDateTime(dateTime.Value) : null;
+}
+
+enum DocProperty {
+	AssigneRedacteur,
+	AssureurId,
+	ChantierId,
+	Commentaire,
+	CompteId,
+	Côte,
+	DeposeLe,
+	DeposePar,
+	DocumentId,
+	Famille,
+	FichierNom,
+	Important,
+	Libelle,
+	ModifieLe,
+	ModifiePar,
+	NumeroContrat,
+	NumeroSinistre,
+	PeriodeValiditeDebut,
+	PeriodeValiditeFin,
+	PersonneId,
+	QualiteValideeLe,
+	QualiteValideePar,
+	QualiteValideeValide,
+	Sens,
+	SousDossierSinistre,
+	Statut,
+	TraiteLe,
+	TraitePar,
+	TypeDocument,
+	TypeGarantie,
+	VuLe,
+	VuPar
 }
 
 /*
