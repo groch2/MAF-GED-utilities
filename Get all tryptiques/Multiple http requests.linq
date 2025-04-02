@@ -61,40 +61,47 @@ async static Task Main() {
 						.Where(typeDocument =>
 							typeDocument.CoteDocumentId == cote.CoteDocumentId)
 						.Select(typeDocument =>
-							new {
-								Famille =
+							new TriptyqueHierarchy(
+								Famille:
 									new TriptyqueItem(
 										Id: famille.FamilleDocumentId,
 										Code: famille.Code,
 										Libellé: famille.Libelle),
-								Cote =
+								Cote:
 									new TriptyqueItem(
 										Id: cote.CoteDocumentId,
 										Code: cote.Code,
 										Libellé: cote.Libelle),
-								TypeDocument =
+								TypeDocument:
 									new TriptyqueItem(
 										Id: typeDocument.TypeDocumentId,
 										Code: typeDocument.Code,
-										Libellé: typeDocument.Libelle),
-							})
+										Libellé: typeDocument.Libelle))
 				))
-				.OrderBy(tryptique => tryptique.Famille.Code, StringComparer.OrdinalIgnoreCase)
-				.ThenBy(tryptique => tryptique.Cote.Code, StringComparer.OrdinalIgnoreCase)
-				.ThenBy(tryptique => tryptique.TypeDocument.Code, StringComparer.OrdinalIgnoreCase)
-				//.Where(t =>
-					//AreStringEqualCaseInsensitive(t.Famille.Code, "DOCUMENTS EMOA") && 
-					//AreStringEqualCaseInsensitive(t.Cote.Code, "GESTION") &&
-					//AreStringEqualCaseInsensitive(t.TypeDocument.Code, "AR POSTE"))
+				.OrderBy(triptyque => triptyque.Famille.Code, StringComparer.OrdinalIgnoreCase)
+				.ThenBy(triptyque => triptyque.Cote.Code, StringComparer.OrdinalIgnoreCase)
+				.ThenBy(triptyque => triptyque.TypeDocument.Code, StringComparer.OrdinalIgnoreCase)
+				//.Where(t => (
+				//	AreStringEqualCaseInsensitive(t.Famille.Code, "DOCUMENTS PERSONNES") && 
+				//		AreStringEqualCaseInsensitive(t.Cote.Code, "IDENTITE") && (
+				//			AreStringEqualCaseInsensitive(t.TypeDocument.Code, "PIECE IDENTITE") ||
+				//			AreStringEqualCaseInsensitive(t.TypeDocument.Code, "KBIS"))) || (
+				//	AreStringEqualCaseInsensitive(t.Famille.Code, "DOCUMENTS CONTRAT") &&
+				//		AreStringEqualCaseInsensitive(t.Cote.Code, "SOUSCRIPTION") &&
+				//		AreStringEqualCaseInsensitive(t.TypeDocument.Code, "COPIE PIECE IDENTITE")))
 				.Select(t =>
 					new {
+						FamilleDocumentId = t.Famille.Id,
 						Famille = t.Famille.Code,
+						CoteDocumentId = t.Cote.Id,
 						Cote = t.Cote.Code,
+						TypeDocumentId = t.TypeDocument.Id,
 						TypeDocument = t.TypeDocument.Code,
-					})
-				//.Where(t => t.TypeDocument.Contains("fausse", StringComparison.OrdinalIgnoreCase)
+					}))
+				.Where(t => AreStringEqualCaseInsensitive(t.Famille, "DOCUMENTS MAF CONSEIL"))
 				//.Where(t =>
 				//	AreStringEqualCaseInsensitive(t.Famille, "DOCUMENTS CONTRAT") ||
+				//	AreStringEqualCaseInsensitive(t.Famille, "DOCUMENTS EMOA") ||
 				//	AreStringEqualCaseInsensitive(t.Famille, "DOCUMENTS PAPS"))
 				.Dump();
 }
@@ -103,5 +110,6 @@ record Famille(int FamilleDocumentId, string Code, string Libelle);
 record Cote(int CoteDocumentId, string Code, string CodeCouleur, string Libelle, int FamilleDocumentId);
 record TypeDocument(int TypeDocumentId, string Code, string Libelle, int CoteDocumentId);
 record TriptyqueItem(int Id, string Code, string Libellé);
+record TriptyqueHierarchy(TriptyqueItem Famille, TriptyqueItem Cote, TriptyqueItem TypeDocument);
 
 static bool AreStringEqualCaseInsensitive(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);

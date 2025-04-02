@@ -10,20 +10,25 @@
 const string ENVIRONMENT_CODE = "int";
 const string GED_API_ADDRESS =
 	$"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/";
-	//"https://localhost:51691/v2/";
+	//"https://localhost:44391/v2/";
 const string FILE_PATH =
-	@"C:\Users\deschaseauxr\Documents\GED\upload_tiny_document.pdf";
+	@"C:\Users\deschaseauxr\Documents\GED\Document de test\test.txt";
 async Task Main() {
 	var documentMetadata =
 		JsonSerializer.SerializeToNode(
 			new {
 				deposePar = "ROD",
 				dateDocument = DateTime.Now.ToUniversalTime(),
-				categoriesFamille = "DOCUMENTS CONTRAT",
-				categoriesCote = "AUTRES",
-				categoriesTypeDocument = "DIVERS",
+				categoriesFamille = "DOCUMENTS PAPS",
+				categoriesCote = "GESTION",
+				categoriesTypeDocument = "AUTRE",
 				canalId = 1,
-				libelle = GetRandomWord()
+				libelle = GetRandomWord(length: 10),
+				assigneRedacteur = "GABU",
+				//numeroSinistre = "MA-24-443-8858090-J",
+				//assigneRedacteur = (object)null,
+				//compteId = 200232,
+				//numeroSinistre = "DS-19-000-1100-W",
 			});
 	var documentId = 
 		await UploadDocumentToGed(
@@ -90,7 +95,13 @@ static async Task<string> UploadDocumentToGed(
 					"finalizeUpload",
 					UriKind.Relative),
 				documentUploadJson);
-		response.EnsureSuccessStatusCode();
+		try {
+			response.EnsureSuccessStatusCode();
+		} catch (HttpRequestException exception) {
+			var responseContent = await response.Content.ReadAsStringAsync();
+			new { Error = exception.HttpRequestError, responseContent }.Dump();
+			throw;
+		}
 		var uploadResponseContent = await response.Content.ReadAsStringAsync();
 		return JsonNode
 			.Parse(uploadResponseContent)["documentId"]

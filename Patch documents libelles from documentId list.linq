@@ -8,21 +8,22 @@
   <IncludeLinqToSql>true</IncludeLinqToSql>
 </Query>
 
+const string ENVIRONMENT_CODE = "int";
 var dice = new Random();
 var httpClient =
 	new HttpClient {
-		BaseAddress = new Uri("https://api-ged-intra.int.maf.local/v2/Documents/")
+		BaseAddress = new Uri($"https://api-ged-intra.{ENVIRONMENT_CODE}.maf.local/v2/Documents/")
 	};
 var patchDocumentsResponses =
 	await Task.WhenAll(
 		File
 			.ReadAllLines(@"C:\Users\deschaseauxr\Documents\GED\documentId list.txt")
 			.Select(async documentId => {
-				var random_text = get_random_text(nb_words: 20);
+				var random_text = get_random_text(nb_words: 20).ToUpperInvariant();
 				var documentPatch =
 					JsonSerializer.SerializeToNode(
 						new {
-							ModifiePar = "toto",
+							ModifiePar = "ROD",
 							Libelle = random_text,
 						});
 				var patchDocumentResponse = await PatchSingleDocument(documentId, documentPatch);
